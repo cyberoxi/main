@@ -2,6 +2,14 @@
 
 This project provides a real-time human detection system using SSD-MobileNet-v2 on a Jetson Nano with a CSI camera (IMX477).
 
+## Files Included
+
+- `jetson_human_detection.py` - Main program with SSD-MobileNet-v2
+- `jetson_human_detection_alt.py` - Alternative version using Haar cascades (more stable)
+- `system_diagnostics.py` - Diagnostic tool for troubleshooting
+- `download_model.py` - Script to download required model files
+- `requirements.txt` - Python dependencies
+
 ## Prerequisites
 
 Before running the program, make sure you have:
@@ -28,36 +36,74 @@ Before running the program, make sure you have:
 
 ## Running the Program
 
-1. Make sure your CSI camera is properly connected and powered
+### Option 1: Main Program (Recommended if it works)
+```bash
+python jetson_human_detection.py
+```
 
-2. Run the human detection program:
+### Option 2: Alternative Program (More compatible)
+```bash
+python jetson_human_detection_alt.py
+```
+
+### Option 3: Run diagnostics first
+```bash
+python system_diagnostics.py
+```
+
+## Troubleshooting "Illegal Instruction" Errors
+
+If you encounter "Illegal instruction (core dumped)" errors:
+
+1. **Try the alternative version first**:
    ```bash
-   python jetson_human_detection.py
+   python jetson_human_detection_alt.py
+   ```
+   This version uses Haar cascades instead of deep learning models.
+
+2. **Run diagnostics**:
+   ```bash
+   python system_diagnostics.py
+   ```
+   This will help identify the specific issue.
+
+3. **Reinstall OpenCV with ARM-compatible version**:
+   ```bash
+   pip uninstall opencv-python opencv-contrib-python
+   pip install opencv-python==4.5.3.56
    ```
 
-3. The program will:
-   - Initialize the CSI camera
-   - Load the SSD-MobileNet-v2 model
-   - Display the camera feed with bounding boxes around detected humans
-   - Show confidence scores for each detection
+4. **Check camera connection**:
+   ```bash
+   v4l2-ctl --list-devices
+   ```
 
-4. Press 'q' to quit the program
+5. **Verify system information**:
+   ```bash
+   uname -a
+   lsb_release -a
+   ```
 
-## Troubleshooting
+## Features
 
-- If the camera doesn't initialize, make sure it's properly connected and the drivers are installed
-- If the model fails to load, ensure the model files are downloaded in the correct directory
-- If you see no detections, try adjusting the confidence threshold in the code
-- If you encounter performance issues, consider reducing the camera resolution in the code
+Both programs will:
+- Initialize the CSI camera
+- Display the camera feed with bounding boxes around detected humans
+- Show confidence scores and detection count
+- Display real-time FPS
+- Allow quitting with 'q' key
 
 ## Configuration
 
 You can adjust these parameters in the code:
 
-- Camera resolution: Modify the `width` and `height` parameters in `create_camera_pipeline()`
-- Confidence threshold: Change the `confidence_threshold` parameter in `HumanDetector.__init__()`
-- Camera flip method: Modify `flip-method` in the GStreamer pipeline if needed
+- Camera resolution: Modify the `width` and `height` parameters
+- Confidence threshold: Change the `confidence_threshold` parameter
+- Camera flip method: Modify `flip-method` in the GStreamer pipeline
 
 ## Note
 
-This program uses the COCO dataset pre-trained model, where class ID 1 corresponds to "person", which is what we're detecting as "human".
+- The main program uses COCO dataset pre-trained SSD-MobileNet-v2 model
+- The alternative program uses Haar cascades for better compatibility
+- Class ID 1 in COCO dataset corresponds to "person"
+- Lower resolutions provide better performance on Jetson Nano
